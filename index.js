@@ -23,18 +23,26 @@ client.on('message', message => {
       const $ = cheerio.load(res.data);
       const images = [];
 
-      $(".post_content > div > .image").each((id, elem) => {
-        const link = $(elem).find("div img").attr("src");
-        console.log(link);
+      $(".post_content").children('div').first().find('img').each((id, elem) => {
+        const link = $(elem).attr("src");
         if(link) {
-          // console.log(link)
           images.push(link);
         }
       });
 
+      $(".post_content")
+        .children(".image")
+        .find("img")
+        .each((id, elem) => {
+          const link = $(elem).attr("src");
+          if (link) {
+            images.push(link);
+          }
+        });
+
       if (images.length) {
         if(images.length === 1) {
-          message.reply(images[0]);
+          message.channel.send(images[0]);
         } else {
           collage({
             images,
@@ -42,7 +50,7 @@ client.on('message', message => {
             gap: 10,
           }).then((buffer) => {
             fs.writeFileSync("./collage.png", buffer);
-            message.reply({
+            message.channel.send({
               files: [buffer],
             });
           });
